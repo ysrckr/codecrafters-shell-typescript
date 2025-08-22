@@ -6,6 +6,11 @@
     "dev": "bun run app/main.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@eslint/js": "^9.33.0",
+    "@types/bun": "latest",
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
+    "jiti": "^2.5.1",
+    "typescript-eslint": "^8.40.0"
   }
 }
