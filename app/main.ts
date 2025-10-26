@@ -7,9 +7,13 @@ const rl = createInterface({
 
 (function command() {
   rl.question("$ ", (answer) => {
-    if (answer === "exit") {
+    if (
+      answer.startsWith("exit") ||
+      Number.isInteger(answer[answer.length - 1])
+    ) {
+      const exitCode = +answer[answer.length - 1];
       rl.close();
-      return 0;
+      return exitCode;
     }
     console.log(`${answer}: command not found`);
     command();
