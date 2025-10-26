@@ -10,17 +10,6 @@ enum Command {
   ECHO = "echo",
 }
 
-function Exit(answer: string) {
-  if (
-    answer.startsWith(Command.EXIT) ||
-    Number.isInteger(answer[answer.length - 1])
-  ) {
-    const exitCode = +answer[answer.length - 1];
-    rl.close();
-    return exitCode;
-  }
-}
-
 function Echo(answer: string) {
   if (answer.startsWith(Command.ECHO)) {
     console.log(answer.replace(`${Command.ECHO} `, ""));
@@ -31,7 +20,14 @@ function Echo(answer: string) {
 
 (function command() {
   rl.question("$ ", (answer) => {
-    Exit(answer);
+    if (
+      answer.startsWith(Command.EXIT) ||
+      Number.isInteger(answer[answer.length - 1])
+    ) {
+      const exitCode = +answer[answer.length - 1];
+      rl.close();
+      return exitCode;
+    }
     Echo(answer);
     command();
   });
