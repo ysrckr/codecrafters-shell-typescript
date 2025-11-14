@@ -30,7 +30,7 @@ const builtinCommands = Object.values(BuiltInCommand);
     }
 
     if (answer.startsWith(BuiltInCommand.ECHO)) {
-      console.log(answer.replace(`${BuiltInCommand.ECHO} `, ""));
+      rl.write(answer.replace(`${BuiltInCommand.ECHO} `, ""));
     }
 
     if (answerWords.length > 0 && process.env.PATH) {
@@ -83,7 +83,7 @@ const builtinCommands = Object.values(BuiltInCommand);
       } else {
         response = `${answerWords[1]}: not found`;
       }
-      console.log(response);
+      rl.write(response);
     }
     command();
   });
