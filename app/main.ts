@@ -13,6 +13,7 @@ enum BuiltInCommand {
   EXIT = "exit",
   ECHO = "echo",
   TYPE = "type",
+  PWD = "pwd",
 }
 
 const builtinCommands = Object.values(BuiltInCommand);
@@ -27,6 +28,11 @@ const builtinCommands = Object.values(BuiltInCommand);
       const exitCode = +answer[answer.length - 1];
       rl.close();
       return exitCode;
+    }
+
+    if (answer.startsWith(BuiltInCommand.PWD)) {
+      console.log(`${path.sep}` + __dirname.split(path.sep).pop());
+      return command();
     }
 
     if (answerWords.length > 0 && process.env.PATH) {
