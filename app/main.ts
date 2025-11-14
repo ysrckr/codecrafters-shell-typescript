@@ -1,4 +1,7 @@
+import fs, { accessSync, existsSync } from "node:fs";
+
 import { createInterface } from "node:readline";
+import path from "node:path";
 
 const rl = createInterface({
   input: process.stdin,
@@ -26,11 +29,33 @@ const builtinCommands = Object.values(BuiltInCommand);
     }
 
     if (answerWords.length > 1 && answer.startsWith("type")) {
+      let response = "";
       if (builtinCommands.includes(answerWords[1] as BuiltInCommand)) {
-        console.log(`${answerWords[1]} is a shell builtin`);
+        response = `${answerWords[1]} is a shell builtin`;
+      } else if (answerWords[1] && process.env.PATH) {
+        const command = answerWords[1];
+        const pathPart = process.env.PATH;
+        const parts = pathPart.split(path.delimiter);
+        let found = false;
+        let fullPath = "";
+        for (const part of parts) {
+          try {
+            if (existsSync(part)) {
+              accessSync(path.join(part, command), fs.constants.X_OK);
+              found = true;
+              fullPath = path.join(part, command);
+            }
+          } catch {}
+        }
+        if (found) {
+          response = `${command} is ${fullPath}`;
+        } else {
+          response = `${answerWords[1]}: not found`;
+        }
       } else {
-        console.log(`${answerWords[1]}: not found`);
+        response = `${answerWords[1]}: not found`;
       }
+      console.log(response);
     } else if (answer.startsWith(BuiltInCommand.ECHO)) {
       console.log(answer.replace(`${BuiltInCommand.ECHO} `, ""));
     } else {
