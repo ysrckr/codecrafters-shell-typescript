@@ -29,10 +29,6 @@ const builtinCommands = Object.values(BuiltInCommand);
       return exitCode;
     }
 
-    if (answer.startsWith(BuiltInCommand.ECHO)) {
-      rl.write(answer.replace(`${BuiltInCommand.ECHO} `, ""));
-    }
-
     if (answerWords.length > 0 && process.env.PATH) {
       const commands = answerWords[0];
       const args = answerWords.slice(1);
@@ -43,10 +39,21 @@ const builtinCommands = Object.values(BuiltInCommand);
         try {
           if (existsSync(part)) {
             accessSync(path.join(part, commands), fs.constants.X_OK);
-            spawn(commands, args, {
-              stdio: "inherit",
-              argv0: commands,
+            const child = spawn(commands, args);
+
+            child.stdout.on("data", (data) => {
+              process.stdout.write(String(data));
             });
+
+            child.stderr.on("data", (data) => {
+              process.stderr.write(String(data));
+            });
+
+            child.on("close", () => {
+              command();
+            });
+
+            return;
           }
         } catch {
           continue;
@@ -58,6 +65,8 @@ const builtinCommands = Object.values(BuiltInCommand);
       let response = "";
       if (builtinCommands.includes(answerWords[1] as BuiltInCommand)) {
         response = `${answerWords[1]} is a shell builtin`;
+      } else if (answer.startsWith(BuiltInCommand.ECHO)) {
+        console.log(answer.replace(`${BuiltInCommand.ECHO} `, ""));
       } else if (answerWords[1] && process.env.PATH) {
         const command = answerWords[1];
         const pathPart = process.env.PATH;
@@ -83,7 +92,7 @@ const builtinCommands = Object.values(BuiltInCommand);
       } else {
         response = `${answerWords[1]}: not found`;
       }
-      rl.write(response);
+      console.log(response);
     }
     command();
   });
