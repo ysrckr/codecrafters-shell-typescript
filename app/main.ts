@@ -2,6 +2,7 @@ import fs, { accessSync, existsSync } from "node:fs";
 
 import { createInterface } from "node:readline";
 import path from "node:path";
+import { spawn } from "node:child_process";
 
 const rl = createInterface({
   input: process.stdin,
@@ -28,6 +29,31 @@ const builtinCommands = Object.values(BuiltInCommand);
       return exitCode;
     }
 
+    if (answer.startsWith(BuiltInCommand.ECHO)) {
+      console.log(answer.replace(`${BuiltInCommand.ECHO} `, ""));
+    }
+
+    if (answerWords.length > 0 && process.env.PATH) {
+      const commands = answerWords[0];
+      const args = answerWords.slice(1);
+      const paths = process.env.PATH;
+      const parts = paths.split(path.delimiter);
+
+      for (const part of parts) {
+        try {
+          if (existsSync(part)) {
+            accessSync(path.join(part, commands), fs.constants.X_OK);
+            spawn(commands, args, {
+              stdio: "inherit",
+              argv0: commands,
+            });
+          }
+        } catch {
+          continue;
+        }
+      }
+    }
+
     if (answerWords.length > 1 && answer.startsWith("type")) {
       let response = "";
       if (builtinCommands.includes(answerWords[1] as BuiltInCommand)) {
@@ -45,7 +71,9 @@ const builtinCommands = Object.values(BuiltInCommand);
               found = true;
               fullPath = path.join(part, command);
             }
-          } catch {}
+          } catch {
+            continue;
+          }
         }
         if (found) {
           response = `${command} is ${fullPath}`;
@@ -56,10 +84,6 @@ const builtinCommands = Object.values(BuiltInCommand);
         response = `${answerWords[1]}: not found`;
       }
       console.log(response);
-    } else if (answer.startsWith(BuiltInCommand.ECHO)) {
-      console.log(answer.replace(`${BuiltInCommand.ECHO} `, ""));
-    } else {
-      console.log(`${answer}: command not found`);
     }
     command();
   });
