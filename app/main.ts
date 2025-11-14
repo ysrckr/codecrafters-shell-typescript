@@ -89,10 +89,10 @@ const builtinCommands = Object.values(BuiltInCommand);
         } else {
           response = `${answerWords[1]}: not found`;
         }
-      } else {
-        response = `${answerWords[1]}: not found`;
       }
       console.log(response);
+    } else {
+      console.log(`${answerWords[0]}: not found`);
     }
     command();
   });
